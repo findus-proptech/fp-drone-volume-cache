@@ -21,6 +21,7 @@ steps:
         MAX_RETRIES=10
 
         while [ $COUNTER -lt $MAX_RETRIES ]; do
+          echo in
           # Check if Docker is running
           docker info > /dev/null 2>&1
           EXIT_CODE=$?
