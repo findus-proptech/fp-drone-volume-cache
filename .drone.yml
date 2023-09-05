@@ -15,7 +15,6 @@ steps:
         path: /var/run
     commands:
       - |
-        #!/bin/bash
         # Initialize counter for retry attempts
         COUNTER=0
         # Maximum number of attempts to check Docker status
@@ -37,7 +36,7 @@ steps:
           fi
 
           # Increment counter
-          let COUNTER=COUNTER+1
+          COUNTER=$((COUNTER + 1))
 
           # Wait for 3 seconds before checking again
           sleep 3
