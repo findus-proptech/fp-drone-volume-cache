@@ -14,6 +14,19 @@ steps:
       - name: dockersock
         path: /var/run
     commands:
+      - |
+        while true; do
+          # Check if Docker is running
+          docker info > /dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            echo "Docker is up and running!"
+            break
+          else
+            echo "Waiting for Docker to start..."
+          fi
+          # Wait for 3 seconds before checking again
+          sleep 3
+        done
       - export VERSION=$(cat VERSION)
       - echo $VERSION
       - docker build -t findusproptech/drone-volume-cache:$VERSION .
