@@ -56,19 +56,19 @@ if [[ -e ".cache_key" ]]; then
         CACHE_PATH=$(echo "$CACHE_PATH" | md5sum | cut -d ' ' -f 1)
     fi
 fi
+CACHE_PATH="/cache/${CACHE_PATH}"
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
   echo "CACHE_PATH: $CACHE_PATH"
   echo
 fi
 
-IFS=','; read -ra SOURCES <<< "$PLUGIN_MOUNT"
+IFS=','; read -ra MOUNTS <<< "$PLUGIN_MOUNT"
 if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
       echo "========== rebuild sources =========="
     fi
-    # Create cache
-    for mount in "${SOURCES[@]}"; do
+    for mount in "${MOUNTS[@]}"; do
         IFS=":" read -r path_container path_host <<< "$mount"
 
         if [[ "$path_container" == /* ]]; then
@@ -80,11 +80,11 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
         fi
 
         if [[ "$path_host" == /* ]]; then
-            path_host="/cache/${CACHE_PATH}/${path_host:1}"
+            path_host="${CACHE_PATH}/${path_host:1}"
         elif [[ "$path_host" == ./* ]]; then
-            path_host="/cache/${CACHE_PATH}/${path_host:2}"
+            path_host="${CACHE_PATH}/${path_host:2}"
         else
-            path_host="/cache/${CACHE_PATH}/$path_host"
+            path_host="${CACHE_PATH}/$path_host"
         fi
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
@@ -111,44 +111,62 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
 elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     # Clear existing cache if asked in commit message
     if [[ $DRONE_COMMIT_MESSAGE == *"[CLEAR CACHE]"* ]]; then
-        if [ -d "/cache/$CACHE_PATH" ]; then
+        if [ -d "$CACHE_PATH" ]; then
             echo "Found [CLEAR CACHE] in commit message, clearing cache..."
-            rm -rf "/cache/$CACHE_PATH"
+            rm -rf "$CACHE_PATH"
             exit 0
         fi
     fi
     # Remove files older than TTL
     if [[ -n "$PLUGIN_TTL" && "$PLUGIN_TTL" > "0" ]]; then
         if [[ $PLUGIN_TTL =~ ^[0-9]+$ ]]; then
-            if [ -d "/cache/$CACHE_PATH" ]; then
+            if [ -d "$CACHE_PATH" ]; then
               echo "Removing files and (empty) folders older than $PLUGIN_TTL days..."
-              find "/cache/$CACHE_PATH" -type f -ctime +$PLUGIN_TTL -delete
-              find "/cache/$CACHE_PATH" -type d -ctime +$PLUGIN_TTL -empty -delete
+              find "$CACHE_PATH" -type f -ctime +$PLUGIN_TTL -delete
+              find "$CACHE_PATH" -type d -ctime +$PLUGIN_TTL -empty -delete
             fi
         else
             echo "Invalid value for ttl, please enter a positive integer. Plugin will ignore ttl."
         fi
     fi
     # Restore from cache
-    for source in "${SOURCES[@]}"; do
-        echo "source: ${source}"
-        IFS=":" read -r dir_host_cache dir_container <<< "$source"
-        # Remove leading ./ if present
-        path_container=$(pwd)/${dir_container#./}
-        path_host_cache=/cache/${CACHE_PATH}/${dir_host_cache#./}
-        echo "path_container: ${path_container}"
-        echo "path_host_cache: ${path_host_cache}"
-        echo "pwd: $(pwd)"
-        if [ -d "$path_host_cache" ]; then
-            echo "Restoring cache for dir $path_host_cache (host) to $path_container (container)"
-            mkdir -p "$path_container" && \
-                rsync -aHA --delete "$path_host_cache/" "$path_container"
-        elif [ -f "$path_host_cache" ]; then
-            echo "Restoring cache for file $path_host_cache (host) to $path_container (container)"
-            mkdir -p "$path_container" && \
-                rsync -aHA --delete "$path_host_cache" "$path_container/"
+    for mount in "${MOUNTS[@]}"; do
+        IFS=":" read -r path_host path_container <<< "$mount"
+
+        if [[ "$path_container" == /* ]]; then
+            path_container=$path_container
+        elif [[ "$path_container" == ./* ]]; then
+            path_container="$(pwd)/${path_container:2}"
         else
-            echo "No cache for $path_host_cache"
+            path_container="$(pwd)/$path_container"
+        fi
+
+        if [[ "$path_host" == /* ]]; then
+            path_host="${CACHE_PATH}/${path_host:1}"
+        elif [[ "$path_host" == ./* ]]; then
+            path_host="${CACHE_PATH}/${path_host:2}"
+        else
+            path_host="${CACHE_PATH}/$path_host"
+        fi
+
+        if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+          echo
+          echo "---------------------------------"
+          echo "mount: ${mount}"
+          echo "path_container: ${path_container}"
+          echo "path_host: ${path_host}"
+        fi
+
+        if [ -d "$path_host" ]; then
+            echo "Restoring cache for dir $path_host (host) to $path_container (container)"
+            mkdir -p "$path_container" && \
+                rsync -aHA --delete "$path_host/" "$path_container"
+        elif [ -f "$path_host" ]; then
+            echo "Restoring cache for file $path_host (host) to $path_container (container)"
+            mkdir -p "$path_container" && \
+                rsync -aHA --delete "$path_host" "$path_container/"
+        else
+            echo "No cache for $path_host"
         fi
     done
 else
