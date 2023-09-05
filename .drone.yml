@@ -15,6 +15,7 @@ steps:
         path: /var/run
     commands:
       - |
+        #!/bin/bash
         # Initialize counter for retry attempts
         COUNTER=0
         # Maximum number of attempts to check Docker status
