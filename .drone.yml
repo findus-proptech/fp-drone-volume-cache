@@ -15,18 +15,34 @@ steps:
         path: /var/run
     commands:
       - |
-        while true; do
+        # Initialize counter for retry attempts
+        COUNTER=0
+        # Maximum number of attempts to check Docker status
+        MAX_RETRIES=10
+
+        while [ $COUNTER -lt $MAX_RETRIES ]; do
           # Check if Docker is running
           docker info > /dev/null 2>&1
-          if [ $? -eq 0 ]; then
+          EXIT_CODE=$?
+          
+          if [ $EXIT_CODE -eq 0 ]; then
             echo "Docker is up and running!"
             break
           else
-            echo "Waiting for Docker to start..."
+            echo "Attempt ${COUNTER}: Waiting for Docker to start... (Exit code: $EXIT_CODE)"
           fi
+
+          # Increment counter
+          let COUNTER=COUNTER+1
+
           # Wait for 3 seconds before checking again
           sleep 3
         done
+
+        if [ $COUNTER -eq $MAX_RETRIES ]; then
+          echo "Failed to start Docker after ${MAX_RETRIES} attempts."
+          exit 1
+        fi
       - export VERSION=$(cat VERSION)
       - echo $VERSION
       - docker build -t findusproptech/drone-volume-cache:$VERSION .
@@ -38,4 +54,3 @@ services:
     volumes:
       - name: dockersock
         path: /var/run
-
