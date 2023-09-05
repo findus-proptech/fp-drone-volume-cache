@@ -48,6 +48,7 @@ steps:
           echo "Failed to start Docker after ${MAX_RETRIES} attempts."
           exit 1
         fi
+        docker info
       - export VERSION=$(cat VERSION)
       - echo $VERSION
       - docker build -t findusproptech/drone-volume-cache:$VERSION .
