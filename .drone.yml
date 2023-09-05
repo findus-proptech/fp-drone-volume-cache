@@ -54,17 +54,17 @@ steps:
         echo "Version is set to $VERSION"
 
         # Build the Docker image
-        docker build -t findusproptech/drone-volume-cache:$VERSION .
+        docker build -t findusproptech/fp-drone-volume-cache:$VERSION .
 
         # Log in to Docker Hub
         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
         # Tag and push the image with the version tag
-        docker push findusproptech/drone-volume-cache:$VERSION
+        docker push findusproptech/fp-drone-volume-cache:$VERSION
 
         # Tag and push the image as 'latest'
-        docker tag findusproptech/drone-volume-cache:$VERSION findusproptech/drone-volume-cache:latest
-        docker push findusproptech/drone-volume-cache:latest
+        docker tag findusproptech/fp-drone-volume-cache:$VERSION findusproptech/fp-drone-volume-cache:latest
+        docker push findusproptech/fp-drone-volume-cache:latest
 
 services:
   - name: svc-docker
