@@ -20,15 +20,16 @@ steps:
         # Maximum number of attempts to check Docker status
         MAX_RETRIES=10
 
+        set +e  # Allow non-zero exit codes
+
         while [ $COUNTER -lt $MAX_RETRIES ]; do
-          echo in
           # Check if Docker is running
           docker info > /dev/null 2>&1
           EXIT_CODE=$?
-          echo $EXIT_CODE
           
           if [ $EXIT_CODE -eq 0 ]; then
             echo "Docker is up and running!"
+            set -e  # Re-enable exit on error
             break
           else
             echo "Attempt ${COUNTER}: Waiting for Docker to start... (Exit code: $EXIT_CODE)"
@@ -41,11 +42,12 @@ steps:
           sleep 3
         done
 
+        set -e  # Re-enable exit on error
+
         if [ $COUNTER -eq $MAX_RETRIES ]; then
           echo "Failed to start Docker after ${MAX_RETRIES} attempts."
           exit 1
         fi
-        echo done
       - export VERSION=$(cat VERSION)
       - echo $VERSION
       - docker build -t findusproptech/drone-volume-cache:$VERSION .
