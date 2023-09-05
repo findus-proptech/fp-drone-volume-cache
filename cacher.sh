@@ -109,6 +109,9 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
         fi
     done
 elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
+    if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+      echo "========== restore sources =========="
+    fi
     # Clear existing cache if asked in commit message
     if [[ $DRONE_COMMIT_MESSAGE == *"[CLEAR CACHE]"* ]]; then
         if [ -d "$CACHE_PATH" ]; then
