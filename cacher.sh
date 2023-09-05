@@ -120,19 +120,19 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
         echo "source: ${source}"
         IFS=":" read -r dir_container dir_host_cache <<< "$source"
         # Remove leading ./ if present
-        dir_container=${dir_container#./}
-        dir_host_cache=${dir_host_cache#./}
-        echo "dir_container=$dir_container"
-        echo "dir_host_cache=$dir_host_cache"
-        if [ -d "/cache/$CACHE_PATH/$source" ]; then
-            echo "Restoring cache for folder $source..."
-            # mkdir -p "$source" && \
-                # rsync -aHA --delete "/cache/$CACHE_PATH/$source/" "$source"
-        elif [ -f "/cache/$CACHE_PATH/$source" ]; then
-            echo "Restoring cache for file $source..."
-            # source_dir=$(dirname $source)
-            # mkdir -p "$source_dir" && \
-                # rsync -aHA --delete "/cache/$CACHE_PATH/$source" "$source_dir/"
+        path_container=${dir_container#./}
+        path_host_cache=${dir_host_cache#./}
+        echo "path_container: ${path_container}"
+        echo "path_host_cache: ${path_host_cache}"
+        echo "pwd: $(pwd)"
+        if [ -d "/cache/$path_host_cache" ]; then
+            echo "Restoring cache for dir $path_host_cache (host) to $path_container (container)"
+            mkdir -p "$path_container" && \
+                rsync -aHA --delete "/cache/$path_host_cache/" "$path_container"
+        elif [ -f "/cache/$path_host_cache" ]; then
+            echo "Restoring cache for file $path_host_cache (host) to $path_container (container)"
+            mkdir -p "$path_container" && \
+                rsync -aHA --delete "/cache/$CACHE_PATH/$source" "$source_dir/"
         else
             echo "No cache for $source"
         fi
