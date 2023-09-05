@@ -5,7 +5,6 @@ image_pull_secrets: [GLO_DOCKER_HUB]
 steps:
   - name: docker-build-push
     image: findusproptech/fpt-drone-cli
-    depends_on: [prepare]
     environment:
       DOCKER_USERNAME:
         from_secret: GLO_DOCKER_USERNAME
