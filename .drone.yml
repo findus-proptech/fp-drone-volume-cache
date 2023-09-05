@@ -21,7 +21,6 @@ steps:
         MAX_RETRIES=10
 
         set +e  # Allow non-zero exit codes
-        docker info
 
         while [ $COUNTER -lt $MAX_RETRIES ]; do
           # Check if Docker is running
@@ -49,10 +48,23 @@ steps:
           echo "Failed to start Docker after $MAX_RETRIES attempts."
           exit 1
         fi
-        docker info
-      - export VERSION=$(cat VERSION)
-      - echo $VERSION
-      - docker build -t findusproptech/drone-volume-cache:$VERSION .
+
+        # Fetch and set VERSION
+        export VERSION=$(cat VERSION)
+        echo "Version is set to $VERSION"
+
+        # Build the Docker image
+        docker build -t findusproptech/drone-volume-cache:$VERSION .
+
+        # Log in to Docker Hub
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+        # Tag and push the image with the version tag
+        docker push findusproptech/drone-volume-cache:$VERSION
+
+        # Tag and push the image as 'latest'
+        docker tag findusproptech/drone-volume-cache:$VERSION findusproptech/drone-volume-cache:latest
+        docker push findusproptech/drone-volume-cache:latest
 
 services:
   - name: svc-docker
