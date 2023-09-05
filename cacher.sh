@@ -68,8 +68,8 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
       echo "========== rebuild sources =========="
     fi
     # Create cache
-    for source in "${SOURCES[@]}"; do
-        IFS=":" read -r path_container path_host <<< "$source"
+    for mount in "${SOURCES[@]}"; do
+        IFS=":" read -r path_container path_host <<< "$mount"
 
         if [[ "$path_container" == /* ]]; then
             path_container=$path_container
@@ -90,9 +90,9 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
           echo
           echo "---------------------------------"
-          echo "source: ${source}"
-          echo "path_host: ${path_host}"
+          echo "mount: ${mount}"
           echo "path_container: ${path_container}"
+          echo "path_host: ${path_host}"
         fi
 
         if [ -d "$path_container" ]; then
