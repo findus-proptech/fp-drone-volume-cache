@@ -1,0 +1,28 @@
+name: docker
+kind: pipeline
+type: docker
+image_pull_secrets: [GLO_DOCKER_HUB]
+steps:
+  - name: docker-build-push
+    image: findusproptech/fpt-drone-cli
+    depends_on: [prepare]
+    environment:
+      DOCKER_USERNAME:
+        from_secret: GLO_DOCKER_USERNAME
+      DOCKER_PASSWORD:
+        from_secret: GLO_DOCKER_PASSWORD
+    volumes:
+      - name: dockersock
+        path: /var/run
+    commands:
+      - export VERSION=$(cat VERSION)
+      - echo $VERSION
+      - docker build -t findusproptech/drone-volume-cache:$VERSION .
+
+services:
+  - name: svc-docker
+    image: docker:dind
+    privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run
