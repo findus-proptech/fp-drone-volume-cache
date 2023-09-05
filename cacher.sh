@@ -58,8 +58,7 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     # Create cache
     for source in "${SOURCES[@]}"; do
         echo "source: ${source}"
-        local input=$1
-        IFS=":" read -r dir_container dir_host_cache <<< "$input"
+        IFS=":" read -r dir_container dir_host_cache <<< "$source"
         # Remove leading ./ if present
         dir_container=${dir_container#./}
         dir_host_cache=${dir_host_cache#./}
@@ -119,8 +118,7 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     # Restore from cache
     for source in "${SOURCES[@]}"; do
         echo "source: ${source}"
-        local input=$1
-        IFS=":" read -r dir_container dir_host_cache <<< "$input"
+        IFS=":" read -r dir_container dir_host_cache <<< "$source"
         # Remove leading ./ if present
         dir_container=${dir_container#./}
         dir_host_cache=${dir_host_cache#./}
