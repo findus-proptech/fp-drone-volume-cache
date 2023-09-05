@@ -50,49 +50,52 @@ if [[ -e ".cache_key" ]]; then
         CACHE_PATH=$(echo "$CACHE_PATH" | md5sum | cut -d ' ' -f 1)
     fi
 fi
-echo "========== settings script ========="
-echo "CACHE_PATH: $CACHE_PATH"
+
+if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+  echo "========== settings script ========="
+  echo "CACHE_PATH: $CACHE_PATH"
+fi
 
 IFS=','; read -ra SOURCES <<< "$PLUGIN_MOUNT"
 if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     # Create cache
     for source in "${SOURCES[@]}"; do
-        echo "source: ${source}"
-        IFS=":" read -r dir_container dir_host_cache <<< "$source"
-        # Remove leading ./ if present
-        dir_container=${dir_container#./}
-        dir_host_cache=${dir_host_cache#./}
-        echo "dir_container=$dir_container"
-        echo "dir_host_cache=$dir_host_cache"
+        IFS=":" read -r path_host path_container <<< "$source"
 
-
-        if [ -d "$source" ]; then
-            echo "Rebuilding cache for folder $source..."
-            # mkdir -p "/cache/$CACHE_PATH/$source" && \
-                # rsync -aHA --delete "$source/" "/cache/$CACHE_PATH/$source"
-        elif [ -f "$source" ]; then
-            echo "Rebuilding cache for file $source..."
-            # source_dir=$(dirname $source)
-            # mkdir -p "/cache/$CACHE_PATH/$source_dir" && \
-                # rsync -aHA --delete "$source" "/cache/$CACHE_PATH/$source_dir/"
+        if [[ "$path_host" == /* ]]; then
+            path_host="/cache/${CACHE_PATH}/${path_host:1}"
+        elif [[ "$var" == ./* ]]; then
+            path_host="/cache/${CACHE_PATH}/${path_host:2}"
         else
-            echo "$source does not exist, removing from cached folder..."
-            # rm -rf "/cache/$CACHE_PATH/$source"
+            path_host="/cache/${CACHE_PATH}/$path_host"
         fi
 
-        # if [ -d "$source" ]; then
-            # echo "Rebuilding cache for folder $source..."
-            # mkdir -p "/cache/$CACHE_PATH/$source" && \
-                # rsync -aHA --delete "$source/" "/cache/$CACHE_PATH/$source"
-        # elif [ -f "$source" ]; then
-            # echo "Rebuilding cache for file $source..."
-            # source_dir=$(dirname $source)
-            # mkdir -p "/cache/$CACHE_PATH/$source_dir" && \
-                # rsync -aHA --delete "$source" "/cache/$CACHE_PATH/$source_dir/"
-        # else
-            # echo "$source does not exist, removing from cached folder..."
-            # rm -rf "/cache/$CACHE_PATH/$source"
-        # fi
+        if [[ "$path_container" == /* ]]; then
+            path_container=$path_container
+        elif [[ "$var" == ./* ]]; then
+            path_container="$(pwd)/${path_container:2}"
+        else
+            path_container="$(pwd)/$path_container"
+        fi
+
+        if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+          echo "source: ${source}"
+          echo "path_host: ${path_host}"
+          echo "path_container: ${path_container}"
+        fi
+
+        if [ -d "$path_container" ]; then
+          echo "Rebuilding cache for folder $path_container (container) to ${path_host} (host) ..."
+            mkdir -p "$path_host" && \
+                rsync -aHA --delete "$path_container/" "$path_host"
+        elif [ -f "$path_container" ]; then
+            echo "Rebuilding cache for file $path_container (container) to ${path_host} (host) ..."
+            mkdir -p "$path_host" && \
+              rsync -aHA --delete "$path_container" "$path_host/"
+        else
+            echo "$path_container does not exist, removing from cached folder..."
+            rm -rf "${path_host}"
+        fi
     done
 elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     # Clear existing cache if asked in commit message
