@@ -71,20 +71,20 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     for source in "${SOURCES[@]}"; do
         IFS=":" read -r path_container path_host <<< "$source"
 
-        if [[ "$path_host" == /* ]]; then
-            path_host="/cache/${CACHE_PATH}/${path_host:1}"
-        elif [[ "$var" == ./* ]]; then
-            path_host="/cache/${CACHE_PATH}/${path_host:2}"
-        else
-            path_host="/cache/${CACHE_PATH}/$path_host"
-        fi
-
         if [[ "$path_container" == /* ]]; then
             path_container=$path_container
-        elif [[ "$var" == ./* ]]; then
+        elif [[ "$path_container" == ./* ]]; then
             path_container="$(pwd)/${path_container:2}"
         else
             path_container="$(pwd)/$path_container"
+        fi
+
+        if [[ "$path_host" == /* ]]; then
+            path_host="/cache/${CACHE_PATH}/${path_host:1}"
+        elif [[ "$path_host" == ./* ]]; then
+            path_host="/cache/${CACHE_PATH}/${path_host:2}"
+        else
+            path_host="/cache/${CACHE_PATH}/$path_host"
         fi
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
