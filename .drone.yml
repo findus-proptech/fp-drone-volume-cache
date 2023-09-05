@@ -33,7 +33,7 @@ steps:
             set -e  # Re-enable exit on error
             break
           else
-            echo "Attempt ${COUNTER}: Waiting for Docker to start... (Exit code: $EXIT_CODE)"
+            echo "Attempt $COUNTER: Waiting for Docker to start... (Exit code: $EXIT_CODE)"
           fi
 
           # Increment counter
@@ -46,7 +46,7 @@ steps:
         set -e  # Re-enable exit on error
 
         if [ $COUNTER -eq $MAX_RETRIES ]; then
-          echo "Failed to start Docker after ${MAX_RETRIES} attempts."
+          echo "Failed to start Docker after $MAX_RETRIES attempts."
           exit 1
         fi
         docker info
