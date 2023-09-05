@@ -3,11 +3,11 @@ set -e
 
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+  echo
   echo "========== drone values ========="
   echo "DRONE_REPO_OWNER: ${DRONE_REPO_OWNER}"
   echo "DRONE_REPO_NAME: ${DRONE_REPO_NAME}"
   echo "DRONE_BRANCH: ${DRONE_BRANCH}"
-  echo "DRONE_JOB_NUMBER: ${DRONE_JOB_NUMBER}"
   echo "DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
   echo
   echo "========== plugin settings ========="
@@ -29,7 +29,7 @@ if [[ $DRONE_COMMIT_MESSAGE == *"[NO CACHE]"* ]]; then
     exit 0
 fi
 
-CACHE_PATH="$DRONE_REPO_OWNER/$DRONE_REPO_NAME/$DRONE_JOB_NUMBER"
+CACHE_PATH="$DRONE_REPO_OWNER/$DRONE_REPO_NAME/$DRONE_BRANCH"
 if [[ -n "$PLUGIN_CACHE_KEY" ]]; then
     function join_by { local IFS="$1"; shift; echo "$*"; }
     IFS=','; read -ra CACHE_PATH_VARS <<< "$PLUGIN_CACHE_KEY"
