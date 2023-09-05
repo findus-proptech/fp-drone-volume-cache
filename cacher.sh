@@ -1,6 +1,17 @@
 #!/bin/bash
 set -e
 
+if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+  echo "========== settings plugin ========="
+  echo "PLUGIN_VERBOSE: ${PLUGIN_VERBOSE}"
+  echo "PLUGIN_CACHE_KEY: ${PLUGIN_CACHE_KEY}"
+  echo "PLUGIN_MOUNT: ${PLUGIN_MOUNT}"
+  echo "PLUGIN_RESTORE: ${PLUGIN_RESTORE}"
+  echo "PLUGIN_REBUILD: ${PLUGIN_REBUILD}"
+  echo "PLUGIN_TTL: ${PLUGIN_TTL}"
+  echo "DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
+fi
+
 if [ -z "$PLUGIN_MOUNT" ]; then
     echo "Specify folders to cache in the mount property! Plugin won't do anything!"
     exit 0
@@ -38,11 +49,14 @@ if [[ -e ".cache_key" ]]; then
         CACHE_PATH=$(echo "$CACHE_PATH" | md5sum | cut -d ' ' -f 1)
     fi
 fi
+echo "========== settings script ========="
+echo "CACHE_PATH: $CACHE_PATH"
 
 IFS=','; read -ra SOURCES <<< "$PLUGIN_MOUNT"
 if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     # Create cache
     for source in "${SOURCES[@]}"; do
+        echo "source: ${source}"
         if [ -d "$source" ]; then
             echo "Rebuilding cache for folder $source..."
             mkdir -p "/cache/$CACHE_PATH/$source" && \
@@ -80,6 +94,7 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     fi
     # Restore from cache
     for source in "${SOURCES[@]}"; do
+        echo "source: ${source}"
         if [ -d "/cache/$CACHE_PATH/$source" ]; then
             echo "Restoring cache for folder $source..."
             mkdir -p "$source" && \
