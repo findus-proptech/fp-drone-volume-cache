@@ -3,14 +3,20 @@ set -e
 
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-  echo "========== settings plugin ========="
+  echo "========== drone values ========="
+  echo "DRONE_REPO_OWNER: ${DRONE_REPO_OWNER}"
+  echo "DRONE_REPO_NAME: ${DRONE_REPO_NAME}"
+  echo "DRONE_BRANCH: ${DRONE_BRANCH}"
+  echo "DRONE_JOB_NUMBER: ${DRONE_JOB_NUMBER}"
+  echo "DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
+  echo
+  echo "========== plugin settings ========="
   echo "PLUGIN_VERBOSE: ${PLUGIN_VERBOSE}"
   echo "PLUGIN_CACHE_KEY: ${PLUGIN_CACHE_KEY}"
   echo "PLUGIN_MOUNT: ${PLUGIN_MOUNT}"
   echo "PLUGIN_RESTORE: ${PLUGIN_RESTORE}"
   echo "PLUGIN_REBUILD: ${PLUGIN_REBUILD}"
   echo "PLUGIN_TTL: ${PLUGIN_TTL}"
-  echo "DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
 fi
 
 if [ -z "$PLUGIN_MOUNT" ]; then
@@ -52,15 +58,18 @@ if [[ -e ".cache_key" ]]; then
 fi
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-  echo "========== settings script ========="
   echo "CACHE_PATH: $CACHE_PATH"
+  echo
 fi
 
 IFS=','; read -ra SOURCES <<< "$PLUGIN_MOUNT"
 if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
+    if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+      echo "========== rebuild sources =========="
+    fi
     # Create cache
     for source in "${SOURCES[@]}"; do
-        IFS=":" read -r path_host path_container <<< "$source"
+        IFS=":" read -r path_container path_host <<< "$source"
 
         if [[ "$path_host" == /* ]]; then
             path_host="/cache/${CACHE_PATH}/${path_host:1}"
@@ -79,6 +88,8 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
         fi
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+          echo
+          echo "---------------------------------"
           echo "source: ${source}"
           echo "path_host: ${path_host}"
           echo "path_container: ${path_container}"
