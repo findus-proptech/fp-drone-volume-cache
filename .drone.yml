@@ -21,6 +21,7 @@ steps:
         MAX_RETRIES=10
 
         set +e  # Allow non-zero exit codes
+        docker info
 
         while [ $COUNTER -lt $MAX_RETRIES ]; do
           # Check if Docker is running
