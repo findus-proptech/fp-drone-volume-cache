@@ -94,12 +94,12 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     fi
     for mount in "${MOUNTS[@]}"; do
         IFS=":" read -r path_container path_host <<< "$mount"
-        path_container=$(process_path "$path_container" "$(pwd)")
         if [ -z $path_host ]; then
-            path_host=$path_container
+            path_host=$(process_path "$path_container" "${CACHE_PATH}")
         else
             path_host=$(process_path "$path_host" "${CACHE_PATH}")
         fi
+        path_container=$(process_path "$path_container" "$(pwd)")
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
             echo
