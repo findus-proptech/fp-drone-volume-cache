@@ -15,20 +15,20 @@ process_path() {
 }
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-  echo
-  echo "⚙️  drone build run values ==================="
-  echo "ℹ️  DRONE_REPO_OWNER: ${DRONE_REPO_OWNER}"
-  echo "ℹ️  DRONE_REPO_NAME: ${DRONE_REPO_NAME}"
-  echo "ℹ️  DRONE_BRANCH: ${DRONE_BRANCH}"
-  echo "ℹ️  DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
-  echo
-  echo "⚙️  drone plugin settings ===================="
-  echo "ℹ️  PLUGIN_VERBOSE: ${PLUGIN_VERBOSE}"
-  echo "ℹ️  PLUGIN_CACHE_KEY: ${PLUGIN_CACHE_KEY}"
-  echo "ℹ️  PLUGIN_MOUNT: ${PLUGIN_MOUNT}"
-  echo "ℹ️  PLUGIN_RESTORE: ${PLUGIN_RESTORE}"
-  echo "ℹ️  PLUGIN_REBUILD: ${PLUGIN_REBUILD}"
-  echo "ℹ️  PLUGIN_TTL: ${PLUGIN_TTL}"
+    echo
+    echo "⚙️  drone build run values ==================="
+    echo "  ℹ️  DRONE_REPO_OWNER: ${DRONE_REPO_OWNER}"
+    echo "  ℹ️  DRONE_REPO_NAME: ${DRONE_REPO_NAME}"
+    echo "  ℹ️  DRONE_BRANCH: ${DRONE_BRANCH}"
+    echo "  ℹ️  DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
+    echo
+    echo "⚙️  drone plugin settings ===================="
+    echo "  ℹ️  PLUGIN_VERBOSE: ${PLUGIN_VERBOSE}"
+    echo "  ℹ️  PLUGIN_CACHE_KEY: ${PLUGIN_CACHE_KEY}"
+    echo "  ℹ️  PLUGIN_MOUNT: ${PLUGIN_MOUNT}"
+    echo "  ℹ️  PLUGIN_RESTORE: ${PLUGIN_RESTORE}"
+    echo "  ℹ️  PLUGIN_REBUILD: ${PLUGIN_REBUILD}"
+    echo "  ℹ️  PLUGIN_TTL: ${PLUGIN_TTL}"
 fi
 
 if [ -z "$PLUGIN_MOUNT" ]; then
@@ -71,8 +71,8 @@ fi
 CACHE_PATH="/cache/${CACHE_PATH}"
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-  echo "ℹ️  CACHE_PATH: $CACHE_PATH"
-  echo
+    echo "ℹ️  CACHE_PATH: $CACHE_PATH"
+    echo
 fi
 
 IFS=','; read -ra MOUNTS <<< "$PLUGIN_MOUNT"
@@ -84,29 +84,29 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
         IFS=":" read -r path_container path_host <<< "$mount"
         path_container=$(process_path "$path_container" "$(pwd)")
         if [ -z $path_host ]; then
-          path_host=$path_container
+            path_host=$path_container
         else
-          path_host=$(process_path "$path_host" "${CACHE_PATH}")
+            path_host=$(process_path "$path_host" "${CACHE_PATH}")
         fi
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-          echo
-          echo "🗻 mount ----------------------------"
-          echo "mount: ${mount}"
-          echo "path_container: ${path_container}"
-          echo "path_host: ${path_host}"
+            echo
+            echo "🗻 mount ----------------------------"
+            echo "  mount: ${mount}"
+            echo "  path_container: ${path_container}"
+            echo "  path_host: ${path_host}"
         fi
 
         if [ -d "$path_container" ]; then
-          echo "✅ Rebuilding cache for folder 🗂 $path_container (container) to ${path_host} (host) ..."
+            echo "  ✅ Rebuilding cache for folder 🗂 $path_container (container) to ${path_host} (host) ..."
             mkdir -p "$path_host" && \
                 rsync -aHA --delete "$path_container/" "$path_host"
         elif [ -f "$path_container" ]; then
-            echo "✅ Rebuilding cache for file 📁 $path_container (container) to ${path_host} (host) ..."
+            echo "  ✅ Rebuilding cache for file 📁 $path_container (container) to ${path_host} (host) ..."
             mkdir -p "$path_host" && \
               rsync -aHA --delete "$path_container" "$path_host/"
         else
-            echo "❌ $path_container does not exist, removing from cached folder..."
+            echo "  ❌ $path_container does not exist, removing from cached folder..."
             rm -rf "${path_host}"
         fi
     done
@@ -139,29 +139,29 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
         IFS=":" read -r path_host path_container <<< "$mount"
         path_host=$(process_path "$path_host" "${CACHE_PATH}")
         if [ -z $path_container ]; then
-          path_container=$path_host
+            path_container=$path_host
         else
-          path_container=$(process_path "$path_container" "$(pwd)")
+            path_container=$(process_path "$path_container" "$(pwd)")
         fi
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-          echo
-          echo "🗻 mount ----------------------------"
-          echo "mount: ${mount}"
-          echo "path_container: ${path_container}"
-          echo "path_host: ${path_host}"
+            echo
+            echo "🗻 mount ----------------------------"
+            echo "  mount: ${mount}"
+            echo "  path_container: ${path_container}"
+            echo "  path_host: ${path_host}"
         fi
 
         if [ -d "$path_host" ]; then
-            echo "✅ Restoring cache for folder 🗂 $path_host (host) to $path_container (container)"
+            echo "  ✅ Restoring cache for folder 🗂 $path_host (host) to $path_container (container)"
             mkdir -p "$path_container" && \
                 rsync -aHA --delete "$path_host/" "$path_container"
         elif [ -f "$path_host" ]; then
-            echo "✅ Restoring cache for file 📁 $path_host (host) to $path_container (container)"
+            echo "  ✅ Restoring cache for file 📁 $path_host (host) to $path_container (container)"
             mkdir -p "$path_container" && \
                 rsync -aHA --delete "$path_host" "$path_container/"
         else
-            echo "❌ No cache for $path_host"
+            echo "  ❌ No cache for $path_host"
         fi
     done
 else
