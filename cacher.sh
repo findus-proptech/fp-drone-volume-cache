@@ -150,12 +150,12 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     # Restore from cache
     for mount in "${MOUNTS[@]}"; do
         IFS=":" read -r path_host path_container <<< "$mount"
-        path_host=$(process_path "$path_host" "${CACHE_PATH}")
         if [ -z $path_container ]; then
-            path_container=$path_host
+            path_container=$(process_path "$path_host" "$(pwd)")
         else
             path_container=$(process_path "$path_container" "$(pwd)")
         fi
+        path_host=$(process_path "$path_host" "${CACHE_PATH}")
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
             echo
