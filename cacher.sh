@@ -1,31 +1,43 @@
 #!/bin/bash
 set -e
 
+process_path() {
+  local path_var=$1
+  local prefix=$2
+
+  if [[ "$path_var" == /* ]]; then
+    echo "$path_var"
+  elif [[ "$path_var" == ./* ]]; then
+    echo "$(pwd)/${path_var:2}"
+  else
+    echo "${prefix}/$path_var"
+  fi
+}
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
   echo
-  echo "========== drone values ========="
-  echo "DRONE_REPO_OWNER: ${DRONE_REPO_OWNER}"
-  echo "DRONE_REPO_NAME: ${DRONE_REPO_NAME}"
-  echo "DRONE_BRANCH: ${DRONE_BRANCH}"
-  echo "DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
+  echo "⚙️  drone build run values ==================="
+  echo "ℹ️  DRONE_REPO_OWNER: ${DRONE_REPO_OWNER}"
+  echo "ℹ️  DRONE_REPO_NAME: ${DRONE_REPO_NAME}"
+  echo "ℹ️  DRONE_BRANCH: ${DRONE_BRANCH}"
+  echo "ℹ️  DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
   echo
-  echo "========== plugin settings ========="
-  echo "PLUGIN_VERBOSE: ${PLUGIN_VERBOSE}"
-  echo "PLUGIN_CACHE_KEY: ${PLUGIN_CACHE_KEY}"
-  echo "PLUGIN_MOUNT: ${PLUGIN_MOUNT}"
-  echo "PLUGIN_RESTORE: ${PLUGIN_RESTORE}"
-  echo "PLUGIN_REBUILD: ${PLUGIN_REBUILD}"
-  echo "PLUGIN_TTL: ${PLUGIN_TTL}"
+  echo "⚙️  drone plugin settings ===================="
+  echo "ℹ️  PLUGIN_VERBOSE: ${PLUGIN_VERBOSE}"
+  echo "ℹ️  PLUGIN_CACHE_KEY: ${PLUGIN_CACHE_KEY}"
+  echo "ℹ️  PLUGIN_MOUNT: ${PLUGIN_MOUNT}"
+  echo "ℹ️  PLUGIN_RESTORE: ${PLUGIN_RESTORE}"
+  echo "ℹ️  PLUGIN_REBUILD: ${PLUGIN_REBUILD}"
+  echo "ℹ️  PLUGIN_TTL: ${PLUGIN_TTL}"
 fi
 
 if [ -z "$PLUGIN_MOUNT" ]; then
-    echo "Specify folders to cache in the mount property! Plugin won't do anything!"
+    echo "❌ Specify folders to cache in the mount property! Plugin won't do anything!"
     exit 0
 fi
 
 if [[ $DRONE_COMMIT_MESSAGE == *"[NO CACHE]"* ]]; then
-    echo "Found [NO CACHE] in commit message, skipping cache restore and rebuild!"
+    echo "❌ Found [NO CACHE] in commit message, skipping cache restore and rebuild!"
     exit 0
 fi
 
@@ -38,7 +50,7 @@ if [[ -n "$PLUGIN_CACHE_KEY" ]]; then
         env_var_value="${!env_var}"
 
         if [[ -z "$env_var_value" ]]; then
-            echo "Warning! Environment variable '${env_var}' does not contain a value, it will be ignored!"
+            echo "☢️  Warning! Environment variable '${env_var}' does not contain a value, it will be ignored!"
         else
             CACHE_PATH_VALUES+=("${env_var_value}")
         fi
@@ -47,11 +59,11 @@ if [[ -n "$PLUGIN_CACHE_KEY" ]]; then
 fi
 
 if [[ -e ".cache_key" ]]; then
-    echo "Found a .cache_key file to be used as the cache path!"
+    echo "ℹ️  Found a .cache_key file to be used as the cache path!"
     CACHE_PATH=$(cut -c-$(getconf NAME_MAX /) .cache_key | head -n 1)
 
     if [[ -n "$PLUGIN_CACHE_KEY_DISABLE_SANITIZE" && "$PLUGIN_CACHE_KEY_DISABLE_SANITIZE" == "true" ]]; then
-        echo "Warning! .cache_key will be used as-is. Sanitization is your responsibility to make it filename friendly!"
+        echo "☢️  Warning! .cache_key will be used as-is. Sanitization is your responsibility to make it filename friendly!"
     else
         CACHE_PATH=$(echo "$CACHE_PATH" | md5sum | cut -d ' ' -f 1)
     fi
@@ -59,37 +71,27 @@ fi
 CACHE_PATH="/cache/${CACHE_PATH}"
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-  echo "CACHE_PATH: $CACHE_PATH"
+  echo "ℹ️  CACHE_PATH: $CACHE_PATH"
   echo
 fi
 
 IFS=','; read -ra MOUNTS <<< "$PLUGIN_MOUNT"
 if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-      echo "========== rebuild sources =========="
+      echo "🏗 rebuild sources ====================="
     fi
     for mount in "${MOUNTS[@]}"; do
         IFS=":" read -r path_container path_host <<< "$mount"
-
-        if [[ "$path_container" == /* ]]; then
-            path_container=$path_container
-        elif [[ "$path_container" == ./* ]]; then
-            path_container="$(pwd)/${path_container:2}"
+        path_container=$(process_path "$path_container" "$(pwd)")
+        if [ -z $path_host ]; then
+          path_host=$path_container
         else
-            path_container="$(pwd)/$path_container"
-        fi
-
-        if [[ "$path_host" == /* ]]; then
-            path_host="${CACHE_PATH}/${path_host:1}"
-        elif [[ "$path_host" == ./* ]]; then
-            path_host="${CACHE_PATH}/${path_host:2}"
-        else
-            path_host="${CACHE_PATH}/$path_host"
+          path_host=$(process_path "$path_host" "${CACHE_PATH}")
         fi
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
           echo
-          echo "🗻 ---------------------------------"
+          echo "🗻 mount ----------------------------"
           echo "mount: ${mount}"
           echo "path_container: ${path_container}"
           echo "path_host: ${path_host}"
@@ -110,12 +112,12 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     done
 elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-      echo "========== restore sources =========="
+      echo "🏗 restore sources ======================"
     fi
     # Clear existing cache if asked in commit message
     if [[ $DRONE_COMMIT_MESSAGE == *"[CLEAR CACHE]"* ]]; then
         if [ -d "$CACHE_PATH" ]; then
-            echo "Found [CLEAR CACHE] in commit message, clearing cache..."
+            echo "ℹ️  Found [CLEAR CACHE] in commit message, clearing cache..."
             rm -rf "$CACHE_PATH"
             exit 0
         fi
@@ -124,37 +126,27 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     if [[ -n "$PLUGIN_TTL" && "$PLUGIN_TTL" > "0" ]]; then
         if [[ $PLUGIN_TTL =~ ^[0-9]+$ ]]; then
             if [ -d "$CACHE_PATH" ]; then
-              echo "Removing files and (empty) folders older than $PLUGIN_TTL days..."
+              echo "ℹ️  Removing files and (empty) folders older than $PLUGIN_TTL days..."
               find "$CACHE_PATH" -type f -ctime +$PLUGIN_TTL -delete
               find "$CACHE_PATH" -type d -ctime +$PLUGIN_TTL -empty -delete
             fi
         else
-            echo "Invalid value for ttl, please enter a positive integer. Plugin will ignore ttl."
+            echo "☢️  Invalid value for ttl, please enter a positive integer. Plugin will ignore ttl."
         fi
     fi
     # Restore from cache
     for mount in "${MOUNTS[@]}"; do
         IFS=":" read -r path_host path_container <<< "$mount"
-
-        if [[ "$path_container" == /* ]]; then
-            path_container=$path_container
-        elif [[ "$path_container" == ./* ]]; then
-            path_container="$(pwd)/${path_container:2}"
+        path_host=$(process_path "$path_host" "${CACHE_PATH}")
+        if [ -z $path_container ]; then
+          path_container=$path_host
         else
-            path_container="$(pwd)/$path_container"
-        fi
-
-        if [[ "$path_host" == /* ]]; then
-            path_host="${CACHE_PATH}/${path_host:1}"
-        elif [[ "$path_host" == ./* ]]; then
-            path_host="${CACHE_PATH}/${path_host:2}"
-        else
-            path_host="${CACHE_PATH}/$path_host"
+          path_container=$(process_path "$path_container" "$(pwd)")
         fi
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
           echo
-          echo "🗻 ---------------------------------"
+          echo "🗻 mount ----------------------------"
           echo "mount: ${mount}"
           echo "path_container: ${path_container}"
           echo "path_host: ${path_host}"
@@ -173,5 +165,5 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
         fi
     done
 else
-    echo "No restore or rebuild flag specified, plugin won't do anything!"
+    echo "❌ No restore or rebuild flag specified, plugin won't do anything!"
 fi
