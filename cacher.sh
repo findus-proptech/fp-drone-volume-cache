@@ -89,22 +89,22 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
           echo
-          echo "---------------------------------"
+          echo "🗻 ---------------------------------"
           echo "mount: ${mount}"
           echo "path_container: ${path_container}"
           echo "path_host: ${path_host}"
         fi
 
         if [ -d "$path_container" ]; then
-          echo "Rebuilding cache for folder $path_container (container) to ${path_host} (host) ..."
+          echo "✅ Rebuilding cache for folder 🗂 $path_container (container) to ${path_host} (host) ..."
             mkdir -p "$path_host" && \
                 rsync -aHA --delete "$path_container/" "$path_host"
         elif [ -f "$path_container" ]; then
-            echo "Rebuilding cache for file $path_container (container) to ${path_host} (host) ..."
+            echo "✅ Rebuilding cache for file 📁 $path_container (container) to ${path_host} (host) ..."
             mkdir -p "$path_host" && \
               rsync -aHA --delete "$path_container" "$path_host/"
         else
-            echo "$path_container does not exist, removing from cached folder..."
+            echo "❌ $path_container does not exist, removing from cached folder..."
             rm -rf "${path_host}"
         fi
     done
@@ -154,22 +154,22 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
           echo
-          echo "---------------------------------"
+          echo "🗻 ---------------------------------"
           echo "mount: ${mount}"
           echo "path_container: ${path_container}"
           echo "path_host: ${path_host}"
         fi
 
         if [ -d "$path_host" ]; then
-            echo "Restoring cache for dir $path_host (host) to $path_container (container)"
+            echo "✅ Restoring cache for folder 🗂 $path_host (host) to $path_container (container)"
             mkdir -p "$path_container" && \
                 rsync -aHA --delete "$path_host/" "$path_container"
         elif [ -f "$path_host" ]; then
-            echo "Restoring cache for file $path_host (host) to $path_container (container)"
+            echo "✅ Restoring cache for file 📁 $path_host (host) to $path_container (container)"
             mkdir -p "$path_container" && \
                 rsync -aHA --delete "$path_host" "$path_container/"
         else
-            echo "No cache for $path_host"
+            echo "❌ No cache for $path_host"
         fi
     done
 else
