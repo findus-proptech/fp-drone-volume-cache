@@ -26,6 +26,17 @@ print_folder_size() {
   fi
 }
 
+print_time() {
+  elapsed_time=$(($1 - $2))
+  if [[ $elapsed_time -eq 1 ]]; then
+    echo "  ⌛️ 1 second"
+  elif [[ $elapsed_time -eq 0 ]]; then
+    echo "  ⌛️ 0 seconds"
+  else
+    echo "  ⌛️ ${elapsed_time} seconds"
+  fi
+}
+
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
     echo
     echo "⚙️  drone build run values"
@@ -124,8 +135,7 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
             rm -rf "${path_host}"
         fi
         end_time=$(date +%s)
-        elapsed_time=$(($end_time - $start_time))
-        echo "  ⌛️ ${elapsed_time}"
+        print_time $end_time $start_time
     done
 elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
@@ -183,8 +193,7 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
             echo "  ❌ No cache for $path_host"
         fi
         end_time=$(date +%s)
-        elapsed_time=$(($end_time - $start_time))
-        echo "  ⌛️ ${elapsed_time}"
+        print_time $end_time $start_time
     done
 else
     echo "❌ No restore or rebuild flag specified, plugin won't do anything!"
