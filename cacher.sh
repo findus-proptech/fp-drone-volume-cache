@@ -14,6 +14,18 @@ process_path() {
   fi
 }
 
+print_file_size() {
+  if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+      echo "  ⌛️ $(ls -lh $1 | awk '{print $5}')"
+  fi
+}
+
+print_folder_size() {
+  if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
+      echo "  ⌛️ $(du -sh $1/ | awk '{print $1}')"
+  fi
+}
+
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
     echo
     echo "⚙️  drone build run values"
@@ -98,10 +110,12 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
         fi
 
         if [ -d "$path_container" ]; then
+            print_folder_size $path_host
             echo "  ✅ Rebuilding cache for folder 🗂 $path_container (container) to ${path_host} (host) ..."
             mkdir -p "$path_host" && \
                 rsync -aHA --delete "$path_container/" "$path_host"
         elif [ -f "$path_container" ]; then
+            print_file_size $path_host
             echo "  ✅ Rebuilding cache for file 📁 $path_container (container) to ${path_host} (host) ..."
             mkdir -p "$path_host" && \
               rsync -aHA --delete "$path_container" "$path_host/"
@@ -153,10 +167,12 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
         fi
 
         if [ -d "$path_host" ]; then
+            print_folder_size $path_host
             echo "  ✅ Restoring cache for folder 🗂 $path_host (host) to $path_container (container)"
             mkdir -p "$path_container" && \
                 rsync -aHA --delete "$path_host/" "$path_container"
         elif [ -f "$path_host" ]; then
+            print_file_size $path_host
             echo "  ✅ Restoring cache for file 📁 $path_host (host) to $path_container (container)"
             mkdir -p "$path_container" && \
                 rsync -aHA --delete "$path_host" "$path_container/"
