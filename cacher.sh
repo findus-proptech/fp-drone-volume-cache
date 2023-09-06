@@ -108,6 +108,7 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
             echo "  path_host: ${path_host}"
         fi
 
+        start_time=$(date +%s)
         if [ -d "$path_container" ]; then
             print_folder_size $path_host
             echo "  ✅ Rebuilding cache for folder 🗂 $path_container (container) to ${path_host} (host) ..."
@@ -122,6 +123,9 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
             echo "  ❌ $path_container does not exist, removing from cached folder..."
             rm -rf "${path_host}"
         fi
+        end_time=$(date +%s)
+        elapsed_time=$(($end_time - $start_time))
+        echo "  ⌛️ ${elapsed_time}"
     done
 elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
@@ -164,6 +168,7 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
             echo "  path_host: ${path_host}"
         fi
 
+        start_time=$(date +%s)
         if [ -d "$path_host" ]; then
             print_folder_size $path_host
             echo "  ✅ Restoring cache for folder 🗂 $path_host (host) to $path_container (container)"
@@ -177,6 +182,9 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
         else
             echo "  ❌ No cache for $path_host"
         fi
+        end_time=$(date +%s)
+        elapsed_time=$(($end_time - $start_time))
+        echo "  ⌛️ ${elapsed_time}"
     done
 else
     echo "❌ No restore or rebuild flag specified, plugin won't do anything!"
