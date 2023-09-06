@@ -16,13 +16,13 @@ process_path() {
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
     echo
-    echo "⚙️  drone build run values ==================="
+    echo "⚙️  drone build run values"
     echo "  ℹ️  DRONE_REPO_OWNER: ${DRONE_REPO_OWNER}"
     echo "  ℹ️  DRONE_REPO_NAME: ${DRONE_REPO_NAME}"
     echo "  ℹ️  DRONE_BRANCH: ${DRONE_BRANCH}"
     echo "  ℹ️  DRONE_COMMIT_MESSAGE: ${DRONE_COMMIT_MESSAGE}"
     echo
-    echo "⚙️  drone plugin settings ===================="
+    echo "⚙️  drone plugin settings"
     echo "  ℹ️  PLUGIN_VERBOSE: ${PLUGIN_VERBOSE}"
     echo "  ℹ️  PLUGIN_CACHE_KEY: ${PLUGIN_CACHE_KEY}"
     echo "  ℹ️  PLUGIN_MOUNT: ${PLUGIN_MOUNT}"
@@ -71,14 +71,14 @@ fi
 CACHE_PATH="/cache/${CACHE_PATH}"
 
 if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-    echo "ℹ️  CACHE_PATH: $CACHE_PATH"
+    echo "  ℹ️  CACHE_PATH: $CACHE_PATH"
     echo
 fi
 
 IFS=','; read -ra MOUNTS <<< "$PLUGIN_MOUNT"
 if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-      echo "🏗 rebuild sources ====================="
+      echo "🏗 rebuild sources"
     fi
     for mount in "${MOUNTS[@]}"; do
         IFS=":" read -r path_container path_host <<< "$mount"
@@ -91,7 +91,7 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
             echo
-            echo "🗻 mount ----------------------------"
+            echo "🗻 mount"
             echo "  mount: ${mount}"
             echo "  path_container: ${path_container}"
             echo "  path_host: ${path_host}"
@@ -112,7 +112,7 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
     done
 elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
     if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-      echo "🏗 restore sources ======================"
+      echo "🏗 restore sources"
     fi
     # Clear existing cache if asked in commit message
     if [[ $DRONE_COMMIT_MESSAGE == *"[CLEAR CACHE]"* ]]; then
@@ -146,7 +146,7 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
             echo
-            echo "🗻 mount ----------------------------"
+            echo "🗻 mount"
             echo "  mount: ${mount}"
             echo "  path_container: ${path_container}"
             echo "  path_host: ${path_host}"
