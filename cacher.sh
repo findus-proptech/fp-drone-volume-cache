@@ -16,13 +16,13 @@ process_path() {
 
 print_file_size() {
   if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-      echo "  ⌛️ $(ls -lh $1 | awk '{print $5}')"
+      echo "  📁 $(ls -lh $1 | awk '{print $5}')"
   fi
 }
 
 print_folder_size() {
   if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
-      echo "  ⌛️ $(du -sh $1/ | awk '{print $1}')"
+      echo "  🗂 $(du -sh $1/ | awk '{print $1}')"
   fi
 }
 
@@ -103,8 +103,7 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
             echo
-            echo "🗻 mount"
-            echo "  mount: ${mount}"
+            echo "🗻 mount ${mount}"
             echo "  path_container: ${path_container}"
             echo "  path_host: ${path_host}"
         fi
@@ -160,8 +159,7 @@ elif [[ -n "$PLUGIN_RESTORE" && "$PLUGIN_RESTORE" == "true" ]]; then
 
         if [[ -n "$PLUGIN_VERBOSE" && "$PLUGIN_VERBOSE" == "true" ]]; then
             echo
-            echo "🗻 mount"
-            echo "  mount: ${mount}"
+            echo "🗻 mount ${mount}"
             echo "  path_container: ${path_container}"
             echo "  path_host: ${path_host}"
         fi
