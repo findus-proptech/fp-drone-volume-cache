@@ -125,11 +125,8 @@ if [[ -n "$PLUGIN_REBUILD" && "$PLUGIN_REBUILD" == "true" ]]; then
             echo "  ✅ Rebuilding cache for folder 🗂:"
             echo "    from: $path_container (container)" 
             echo "    to: ${path_host} (host) ..."
-            echo "ls path container"
-            ls ${path_container}
             mkdir -p "$path_host" && \
                 rsync -aHA --delete "$path_container/" "$path_host"
-            ls ${path_host}
         elif [ -f "$path_container" ]; then
             print_file_size $path_host
             echo "  ✅ Rebuilding cache for file 📁"
